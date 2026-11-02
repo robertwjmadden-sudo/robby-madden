@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Cloud Analects</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+    <div class="cloud c4"></div>
+    <div class="cloud c5"></div>
+    <div class="haze"></div>
+  </div>
+
+  <main class="page">
+    <p class="title">A voice from the Analects<strong>Confucius</strong></p>
+
+    <div class="portrait-wrap" id="portraitWrap">
+      <div class="halo"></div>
+      <div class="portrait">
+        <img src="confucius.jpg" alt="Portrait of Confucius">
+        <span class="mouth" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <section class="chat-shell chat-panel" aria-label="Conversation with Confucius">
+      <div class="log" id="log"></div>
+      <form class="composer" id="form">
+        <input id="query" type="text" autocomplete="off" placeholder="Ask of virtue, learning, friendship…" aria-label="Your question">
+        <button type="submit">Ask</button>
+      </form>
+    </section>
+    <p class="hint">Replies are English lines from James Legge’s translation of the Analects. Confucius speaks them aloud.</p>
+  </main>
+
+  <script>
+    const QUOTES = [
+      { tags: "learn learning study perseverance application friends friendship delight virtue unknown unnoticed greeting hello hi", source: "Analects 1.1", text: "The Master said, 'Is it not pleasant to learn with a constant perseverance and application? Is it not delightful to have friends coming from distant quarters? Is he not a man of complete virtue, who feels no discomposure though men may take no note of him?'" },
+      { tags: "words appearance flattery virtue sincerity honest speech", source: "Analects 1.3", text: "The Master said, 'Fine words and an insinuating appearance are seldom associated with true virtue.'" },
+      { tags: "youth filial respect elders love friendship study home family", source: "Analects 1.6", text: "The Master said, 'A youth, when at home, should be filial, and, abroad, respectful to his elders. He should be earnest and truthful. He should overflow in love to all, and cultivate the friendship of the good. When he has time and opportunity, after the performance of these things, he should employ them in polite studies.'" },
+      { tags: "faithfulness sincerity friends faults change reform self", source: "Analects 1.8", text: "The Master said, 'Hold faithfulness and sincerity as first principles. Have no friends not equal to yourself. When you have faults, do not fear to abandon them.'" },
+      { tags: "filial father parents will conduct three years piety family", source: "Analects 1.11", text: "The Master said, 'While a man's father is alive, look at the bent of his will; when his father is dead, look at his conduct. If for three years he does not alter from the way of his father, he may be called filial.'" },
+      { tags: "know knowing men reputation fame concern self", source: "Analects 1.16", text: "The Master said, 'I will not be afflicted at men's not knowing me; I will be afflicted that I do not know men.'" },
+      { tags: "government virtue leader star north polar ruler example", source: "Analects 2.1", text: "The Master said, 'He who exercises government by means of his virtue may be compared to the north polar star, which keeps its place and all the stars turn towards it.'" },
+      { tags: "law punishment shame virtue propriety government people lead", source: "Analects 2.3", text: "The Master said, 'If the people be led by laws, and uniformity sought to be given them by punishments, they will try to avoid the punishment, but have no sense of shame. If they be led by virtue, and uniformity sought to be given them by the rules of propriety, they will have the sense of shame, and moreover will become good.'" },
+      { tags: "age life learning thirty forty fifty sixty seventy heaven destiny", source: "Analects 2.4", text: "The Master said, 'At fifteen, I had my mind bent on learning. At thirty, I stood firm. At forty, I had no doubts. At fifty, I knew the decrees of Heaven. At sixty, my ear was an obedient organ for the reception of truth. At seventy, I could follow what my heart desired, without transgressing what was right.'" },
+      { tags: "filial piety parents obey family", source: "Analects 2.5", text: "Mang I asked what filial piety was. The Master said, 'It is not being disobedient.'" },
+      { tags: "filial parents support reverence dogs horses respect family", source: "Analects 2.7", text: "Tsze-yu asked what filial piety was. The Master said, 'The filial piety of now-a-days means the support of one's parents. But dogs and horses likewise are able to do something in the way of support; without reverence, what is there to distinguish the one support given from the other?'" },
+      { tags: "thought learning study peril labour mind", source: "Analects 2.15", text: "The Master said, 'Learning without thought is labour lost; thought without learning is perilous.'" },
+      { tags: "knowledge know ignorance wisdom humble humility", source: "Analects 2.17", text: "The Master said, 'Yu, shall I teach you what knowledge is? When you know a thing, to hold that you know it; and when you do not know a thing, to allow that you do not know it; this is knowledge.'" },
+      { tags: "right courage action duty", source: "Analects 2.24", text: "The Master said, 'To see what is right and not to do it is want of courage.'" },
+      { tags: "way truth morning evening death regret tao path", source: "Analects 4.8", text: "The Master said, 'If a man in the morning hear the right way, he may die in the evening without regret.'" },
+      { tags: "scholar truth clothes food shame poverty", source: "Analects 4.9", text: "The Master said, 'A scholar, whose mind is set on truth, and who is ashamed of bad clothes and bad food, is not fit to be discoursed with.'" },
+      { tags: "place office known worthy concern self reputation work", source: "Analects 4.14", text: "The Master said, 'A man should say, I am not concerned that I have no place, I am concerned how I may fit myself for one. I am not concerned that I am not known, I seek to be worthy to be known.'" },
+      { tags: "right profit superior small mean righteousness money", source: "Analects 4.16", text: "The Master said, 'The mind of the superior man is conversant with righteousness; the mind of the mean man is conversant with gain.'" },
+      { tags: "worth example examine self others character emulate", source: "Analects 4.17", text: "The Master said, 'When we see men of worth, we should think of equalling them; when we see men of a contrary character, we should turn inwards and examine ourselves.'" },
+      { tags: "cautious careful seldom err mistake", source: "Analects 4.23", text: "The Master said, 'The cautious seldom err.'" },
+      { tags: "virtue neighbors community practice alone", source: "Analects 4.25", text: "The Master said, 'Virtue is not left to stand alone. He who practises it will have neighbors.'" },
+      { tags: "know love delight truth joy", source: "Analects 6.20", text: "The Master said, 'They who know the truth are not equal to those who love it, and they who love it are not equal to those who delight in it.'" },
+      { tags: "virtue difficulty first success later work effort", source: "Analects 6.22", text: "Fan Ch'ih asked what constituted wisdom. The Master said, 'To give one's self earnestly to the duties due to men, and, while respecting spiritual beings, to keep aloof from them, may be called wisdom.' He asked about perfect virtue. The Master said, 'The man of virtue makes the difficulty to be overcome his first business, and success only a subsequent consideration; this may be called perfect virtue.'" },
+      { tags: "knowledge antiquity study humble born", source: "Analects 7.20", text: "The Master said, 'I am not one who was born in the possession of knowledge; I am one who is fond of antiquity, and earnest in seeking it there.'" },
+      { tags: "teachers two others good bad follow avoid example", source: "Analects 7.22", text: "The Master said, 'When I walk along with two others, they may serve me as my teachers. I will select their good qualities and follow them, their bad qualities and avoid them.'" },
+      { tags: "virtue remote near wish self", source: "Analects 7.30", text: "The Master said, 'Is virtue a thing remote? I wish to be virtuous, and lo! virtue is at hand.'" },
+      { tags: "superior composed satisfied mean distress anxiety peace", source: "Analects 7.37", text: "The Master said, 'The superior man is satisfied and composed; the mean man is always full of distress.'" },
+      { tags: "propriety respect carefulness boldness manners rules", source: "Analects 8.2", text: "The Master said, 'Respectfulness, without the rules of propriety, becomes laborious bustle; carefulness, without the rules of propriety, becomes timidity; boldness, without the rules of propriety, becomes insubordination; straightforwardness, without the rules of propriety, becomes rudeness.'" },
+      { tags: "odes poetry propriety music character mind", source: "Analects 8.8", text: "The Master said, 'It is by the Odes that the mind is aroused. It is by the Rules of Propriety that the character is established. It is from Music that the finish is received.'" },
+      { tags: "poverty wealth government shame money honour learning faith", source: "Analects 8.13", text: "The Master said, 'With sincere faith he unites the love of learning; holding firm to death, he is perfecting the excellence of his course. When a country is well-governed, poverty and a mean condition are things to be ashamed of. When a country is ill-governed, riches and honour are things to be ashamed of.'" },
+      { tags: "beyond short excess deficiency balance middle", source: "Analects 11.16", text: "The Master said, 'To go beyond is as wrong as to fall short.'" },
+      { tags: "quick haste small advantages patience thorough great affairs", source: "Analects 13.17", text: "The Master said, 'Do not be desirous to have things done quickly; do not look at small advantages. Desire to have things done quickly prevents their being done thoroughly. Looking at small advantages prevents great affairs from being accomplished.'" },
+      { tags: "affable adulatory superior mean manners", source: "Analects 13.23", text: "The Master said, 'The superior man is affable, but not adulatory; the mean man is adulatory, but not affable.'" },
+      { tags: "firm enduring simple modest virtue character", source: "Analects 13.27", text: "The Master said, 'The firm, the enduring, the simple, and the modest are near to virtue.'" },
+      { tags: "speech modest words promise", source: "Analects 14.20", text: "The Master said, 'He who speaks without modesty will find it difficult to make his words good.'" },
+      { tags: "modest speech actions deeds superior", source: "Analects 14.27", text: "The Master said, 'The superior man is modest in his speech, but exceeds in his actions.'" },
+      { tags: "righteousness propriety humility sincerity superior", source: "Analects 15.18", text: "The Master said, 'The superior man in everything considers righteousness to be essential. He performs it according to the rules of propriety. He brings it forth in humility. He completes it with sincerity. This is indeed a superior man.'" },
+      { tags: "seek self others superior mean inner", source: "Analects 15.21", text: "The Master said, 'What the superior man seeks is in himself. What the mean man seeks is in others.'" },
+      { tags: "reciprocity golden rule others yourself life word empathy kindness", source: "Analects 15.24", text: "Tsze-kung asked, saying, 'Is there one word which may serve as a rule of practice for all one's life?' The Master said, 'Is not Reciprocity such a word? What you do not want done to yourself, do not do to others.'" },
+      { tags: "require self others resentment expectation", source: "Analects 15.15", text: "The Master said, 'He who requires much from himself and little from others, will keep himself from being the object of resentment.'" },
+      { tags: "distant future plan sorrow near worry", source: "Analects 15.12", text: "The Master said, 'If a man take no thought about what is distant, he will find sorrow near at hand.'" },
+      { tags: "tools work mechanic prepare craft skill", source: "Analects 15.10", text: "The Master said, 'The mechanic, who wishes to do his work well, must first sharpen his tools.'" },
+      { tags: "faults reform change error mistake", source: "Analects 15.30", text: "The Master said, 'To have faults and not to reform them, this, indeed, should be pronounced having faults.'" },
+      { tags: "sacrifice life virtue courage death scholar", source: "Analects 15.9", text: "The Master said, 'The determined scholar and the man of virtue will not seek to live at the expense of injuring their virtue. They will even sacrifice their lives to preserve their virtue complete.'" },
+      { tags: "virtue water fire death course", source: "Analects 15.35", text: "The Master said, 'Virtue is more to man than either water or fire. I have seen men die from treading on water and fire, but I have never seen a man die from treading the course of virtue.'" },
+      { tags: "nature practice alike different habit education", source: "Analects 17.2", text: "The Master said, 'By nature, men are nearly alike; by practice, they get to be wide apart.'" },
+      { tags: "five virtue gravity generosity sincerity earnestness kindness", source: "Analects 17.6", text: "Tsze-chang asked Confucius about perfect virtue. Confucius said, 'To be able to practise five things everywhere under Heaven constitutes perfect virtue: gravity, generosity of soul, sincerity, earnestness, and kindness. If you are grave, you will not be treated with disrespect. If you are generous, you will win all. If you are sincere, people will repose trust in you. If you are earnest, you will accomplish much. If you are kind, this will enable you to employ the services of others.'" },
+      { tags: "friendship friends advantageous injurious upright sincere", source: "Analects 16.4", text: "Confucius said, 'There are three friendships which are advantageous, and three which are injurious. Friendship with the upright; friendship with the sincere; and friendship with the man of much observation: these are advantageous. Friendship with the man of specious airs; friendship with the insinuatingly soft; and friendship with the glib-tongued: these are injurious.'" },
+      { tags: "youth lust strength quarrel old covetous guards temptation", source: "Analects 16.7", text: "Confucius said, 'There are three things which the superior man guards against. In youth, when the physical powers are not yet settled, he guards against lust. When he is strong and the physical powers are full of vigour, he guards against quarrelsomeness. When he is old, and the animal powers are decayed, he guards against covetousness.'" }
+    ];
+
+    const FALLBACK = QUOTES.find(q => q.source === "Analects 2.17");
+    const BY_SOURCE = Object.fromEntries(QUOTES.map(q => [q.source, q]));
+
+    const ROUTES = [
+      { re: /golden\s*rule|treat others|do unto|do to others|reciproc|empath|compassion|put yourself/i, source: "Analects 15.24" },
+      { re: /friend|companion|companionship/i, source: "Analects 16.4" },
+      { re: /filial|parent|mother|father|family|son|daughter|elder/i, source: "Analects 2.7" },
+      { re: /learn without thought|thought without learn/i, source: "Analects 2.15" },
+      { re: /what is knowledge|what is wisdom|admit.*not know|do not know/i, source: "Analects 2.17" },
+      { re: /learn|study|educat|school|student|scholar|thought/i, source: "Analects 2.15" },
+      { re: /govern|ruler|leader|politic|king|state|law|punish/i, source: "Analects 2.3" },
+      { re: /north star|example for others|lead by virtue/i, source: "Analects 2.1" },
+      { re: /money|wealth|rich|poor|poverty|profit|gain|honou?r/i, source: "Analects 8.13" },
+      { re: /courage|brave|see what is right|duty/i, source: "Analects 2.24" },
+      { re: /fault|mistake|error|reform|change yourself|repent/i, source: "Analects 15.30" },
+      { re: /speech|speak|words|modest in|promise/i, source: "Analects 14.27" },
+      { re: /hurry|haste|impatient|quickly|small advantage/i, source: "Analects 13.17" },
+      { re: /tool|prepare|craft|work well|sharpen/i, source: "Analects 15.10" },
+      { re: /plan|future|distant|short.?sight/i, source: "Analects 15.12" },
+      { re: /age|thirty|forty|fifty|sixty|seventy|grow old|youth and/i, source: "Analects 2.4" },
+      { re: /youth|lust|quarrel|covet|temptation|guard against/i, source: "Analects 16.7" },
+      { re: /teacher|mentor|two others|role model|emulate/i, source: "Analects 7.22" },
+      { re: /examine yourself|see men of worth|compare yourself/i, source: "Analects 4.17" },
+      { re: /known|fame|reputation|recognition|place in the world|career|office/i, source: "Analects 4.14" },
+      { re: /righteous|profit vs|gain vs|right versus/i, source: "Analects 4.16" },
+      { re: /propriety|manners|etiquette|ritual|rude|boldness/i, source: "Analects 8.2" },
+      { re: /music|ode|poem|poetry/i, source: "Analects 8.8" },
+      { re: /kindness|generosity|earnest|gravity|five things|perfect virtue/i, source: "Analects 17.6" },
+      { re: /nature|habit|practice makes|alike/i, source: "Analects 17.2" },
+      { re: /die|death|sacrifice|life for virtue/i, source: "Analects 15.9" },
+      { re: /morning.*way|hear the (right )?way/i, source: "Analects 4.8" },
+      { re: /beyond|fall short|excess|too much|too little|balance|moderation/i, source: "Analects 11.16" },
+      { re: /peace|composed|distress|anxiety|worry|content/i, source: "Analects 7.37" },
+      { re: /look within|seek in yourself|in himself/i, source: "Analects 15.21" },
+      { re: /expect of others|resent|require much/i, source: "Analects 15.15" },
+      { re: /cautious|careful|seldom err/i, source: "Analects 4.23" },
+      { re: /neighbor|not stand alone|practise virtue/i, source: "Analects 4.25" },
+      { re: /know.*love.*delight|delight in/i, source: "Analects 6.20" },
+      { re: /born with knowledge|antiquity|not born wise/i, source: "Analects 7.20" },
+      { re: /virtue (near|remote|at hand)/i, source: "Analects 7.30" },
+      { re: /flatter|fine words|insinuating/i, source: "Analects 1.3" },
+      { re: /hello|hi\b|greet|welcome|who are you/i, source: "Analects 1.1" }
+    ];
+
+    const SYN = {
+      friend: ["friendship", "friends"], friends: ["friendship", "friends"], friendship: ["friendship", "friends"],
+      learn: ["learning", "study", "thought"], learning: ["learning", "study"], study: ["learning", "study", "thought"],
+      teach: ["teachers", "learning"], teacher: ["teachers", "learning"], wisdom: ["knowledge", "wisdom", "truth"],
+      know: ["knowledge", "know"], knowledge: ["knowledge", "know"], ignorant: ["knowledge", "ignorance"],
+      parent: ["filial", "parents", "family"], parents: ["filial", "parents"], mom: ["filial", "parents"], dad: ["filial", "father"],
+      government: ["government", "ruler", "law"], leader: ["government", "ruler", "virtue"], lead: ["government", "ruler"],
+      money: ["wealth", "profit", "poverty"], rich: ["wealth", "honour", "poverty"], poor: ["poverty", "wealth"],
+      brave: ["courage", "right"], courage: ["courage", "right"], mistake: ["faults", "reform"],
+      speech: ["speech", "words", "modest"], talk: ["speech", "words"], manners: ["propriety", "rules"],
+      hurry: ["haste", "quick"], patience: ["haste", "quick"], job: ["place", "work"], work: ["tools", "work"],
+      fame: ["known", "reputation"], respect: ["propriety", "reverence", "filial"], kind: ["kindness", "generosity"],
+      honest: ["sincerity", "faithfulness"], plan: ["distant", "future"], worry: ["distress", "distant"],
+      self: ["self", "examine"], others: ["reciprocity", "others"], treat: ["reciprocity", "others"],
+      school: ["learning", "study"], education: ["learning", "study"], politics: ["government", "law"],
+      death: ["death", "sacrifice"], old: ["age", "old"], young: ["youth", "age"]
+    };
+
+    const STOP = new Set("the and for you are not all one may his him they them this that with from have has had was were been being will can does did your our their into about than then also such said how what when who why which whom whose tell please like just really some any something someone".split(" "));
+
+    const logEl = document.getElementById("log");
+    const form = document.getElementById("form");
+    const input = document.getElementById("query");
+    const wrap = document.getElementById("portraitWrap");
+
+    function tokenize(s) {
+      return (s || "").toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/).filter(w => w.length > 2 && !STOP.has(w));
+    }
+
+    function conceptsFrom(query) {
+      const words = tokenize(query);
+      const concepts = new Set(words);
+      words.forEach(function (w) {
+        (SYN[w] || []).forEach(function (x) { concepts.add(x); });
+      });
+      return concepts;
+    }
+
+    function pickQuote(query) {
+      for (let i = 0; i < ROUTES.length; i++) {
+        if (ROUTES[i].re.test(query)) return BY_SOURCE[ROUTES[i].source];
+      }
+      const concepts = conceptsFrom(query);
+      if (!concepts.size) return FALLBACK;
+      let best = FALLBACK;
+      let bestScore = 0;
+      QUOTES.forEach(function (q) {
+        const tags = tokenize(q.tags);
+        let score = 0;
+        tags.forEach(function (t) {
+          if (concepts.has(t)) score += 4;
+          else {
+            concepts.forEach(function (c) {
+              if (c.length > 3 && t.length > 3 && (t.indexOf(c) === 0 || c.indexOf(t) === 0)) score += 2;
+            });
+          }
+        });
+        if (score > bestScore) {
+          bestScore = score;
+          best = q;
+        }
+      });
+      return bestScore >= 4 ? best : FALLBACK;
+    }
+
+    function addBubble(role, who, text, cite) {
+      const el = document.createElement("div");
+      el.className = "bubble " + role;
+      const label = document.createElement("span");
+      label.className = "who";
+      label.textContent = who;
+      el.appendChild(label);
+      el.appendChild(document.createTextNode(text));
+      if (cite) {
+        const c = document.createElement("span");
+        c.className = "cite";
+        c.textContent = cite;
+        el.appendChild(c);
+      }
+      logEl.appendChild(el);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function spokenText(quote) {
+      return quote.text.replace(/^The Master said, /, "").replace(/^Confucius said, /, "").replace(/^[^']*'/, "").replace(/'\s*$/, "");
+    }
+
+    function speak(quote) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(spokenText(quote));
+      u.rate = 0.92;
+      u.pitch = 0.85;
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v => /en[-_]?GB/i.test(v.lang) && /male|daniel|arthur|george/i.test(v.name))
+        || voices.find(v => /^en/i.test(v.lang));
+      if (preferred) u.voice = preferred;
+      wrap.classList.add("talking");
+      u.onend = u.onerror = function () {
+        wrap.classList.remove("talking");
+      };
+      window.speechSynthesis.speak(u);
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const q = input.value.trim();
+      if (!q) return;
+      addBubble("user", "You", q);
+      input.value = "";
+      const quote = pickQuote(q);
+      addBubble("master", "Confucius", quote.text, quote.source);
+      speak(quote);
+    });
+
+    const welcome = QUOTES[0];
+    addBubble("master", "Confucius", welcome.text, welcome.source);
+    window.speechSynthesis.getVoices();
+  </script>
+</body>
+</html>
